@@ -18,37 +18,32 @@ def json_test():
 
 
 def path_test():
-    path = pathlib.Path('/Users/ycx/Desktop/')
-    e = path.exists()
-    print(e)
-    print('files : ')
-    for f in path.iterdir():
-        print(f)
-    pass
+    path = pathlib.Path('test/dir1/')
+    path.mkdir()
+    print(path.exists())
 
 
-def url_test(keyword):
-    url = 'https://so.azs2019.com/serch.php?keyword='
-    url += requests.utils.quote(keyword, encoding='gbk')
-    webpage = requests.get(url)
-    if webpage.encoding == 'ISO-8859-1':
-        encodings = requests.utils.get_encodings_from_content(webpage.text)
-        if encodings:
-            webpage.encoding = encodings[0]
-        else:
-            webpage.encoding = webpage.apparent_encoding
+def url_test(keyword, file=None):
+    if file is None:
+        url = 'https://so.azs2019.com/serch.php?keyword='
+        url += requests.utils.quote(keyword, encoding='gbk')
+        webpage = requests.get(url)
+        if webpage.encoding == 'ISO-8859-1':
+            encodings = requests.utils.get_encodings_from_content(webpage.text)
+            if encodings:
+                webpage.encoding = encodings[0]
+            else:
+                webpage.encoding = webpage.apparent_encoding
+        dom = bs4.BeautifulSoup(webpage.text, features='lxml')
+    else:
+        fp = open(file)
+        dom = bs4.BeautifulSoup(fp, features='lxml')
 
-    # dom = bs4.BeautifulSoup(webpage.text, features='lxml')
-    fp = open('page.html')
-    dom = bs4.BeautifulSoup(fp, features='lxml')
     content3 = dom.find_all('p', class_='focus')
     for c in content3:
         print(c.a['href'])
 
-    fp = open('page.html', 'w')
-    fp.write(webpage.text)
-    fp.close()
-
 
 if __name__ == '__main__':
-    url_test('尤奈')
+    # url_test('尤奈', file='page.html')
+    path_test()
