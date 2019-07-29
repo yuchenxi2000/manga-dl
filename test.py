@@ -19,8 +19,10 @@ def json_test():
 
 def path_test():
     path = pathlib.Path('test/dir1/')
-    path.mkdir()
-    print(path.exists())
+    path = path.joinpath('1.txt')
+    fp = open(path, 'w+')
+    fp.write('123\n')
+    fp.close()
 
 
 def url_test(keyword, file=None):
@@ -45,5 +47,5 @@ def url_test(keyword, file=None):
 
 
 if __name__ == '__main__':
-    # url_test('尤奈', file='page.html')
-    path_test()
+    url_test('尤奈', file='page.html')
+    # path_test()
