@@ -56,34 +56,39 @@ def get_all_image(save_path, dirname, url):
         url = url_prefix + link['href']
 
 
-# parameter passed
-argv = sys.argv
-if len(argv) != 3:
-    print('num of arguments must be 3. use \'-h\' for usage')
-    exit(-1)
-save_path = argv[1]
-if save_path == '-h':
-    print('usage: \nfirst argument: save folder\n \
-    second argument: file containing url of images.\n \
-    if you want to know how to write url file, please refer to README.md.')
-    exit(0)
-if save_path[-1] != '/':
-    save_path += '/'
+def main():
+    # parameter passed
+    argv = sys.argv
+    if len(argv) != 3:
+        print('num of arguments must be 3. use \'-h\' for usage')
+        exit(-1)
+    save_path = argv[1]
+    if save_path == '-h':
+        print('usage: \nfirst argument: save folder\n \
+        second argument: file containing url of images.\n \
+        if you want to know how to write url file, please refer to README.md.')
+        exit(0)
+    if save_path[-1] != '/':
+        save_path += '/'
 
-url_file = open(argv[2], 'r')
-folder_name = ''
-set_url = ''
-line_cnt = 0
-for line in url_file:
-    if line_cnt % 2 == 0:
-        folder_name = line
-    else:
-        set_url = line
-        if folder_name[-1] == '\n':
-            folder_name = folder_name[:-1]
-        if folder_name[-1] != '/':
-            folder_name += '/'
-        if set_url[-1] == '\n':
-            set_url = set_url[:-1]
-        get_all_image(save_path, folder_name, set_url)
-    line_cnt += 1
+    url_file = open(argv[2], 'r')
+    folder_name = ''
+    set_url = ''
+    line_cnt = 0
+    for line in url_file:
+        if line_cnt % 2 == 0:
+            folder_name = line
+        else:
+            set_url = line
+            if folder_name[-1] == '\n':
+                folder_name = folder_name[:-1]
+            if folder_name[-1] != '/':
+                folder_name += '/'
+            if set_url[-1] == '\n':
+                set_url = set_url[:-1]
+            get_all_image(save_path, folder_name, set_url)
+        line_cnt += 1
+
+
+if __name__ == '__main__':
+    main()
