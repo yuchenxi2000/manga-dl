@@ -4,7 +4,7 @@ import threading
 import requests
 import bs4
 
-search_url_prefix = ''
+search_url_prefix = 'https://so.azs2019.com/serch.php?keyword='
 
 
 class ThreadDL:
