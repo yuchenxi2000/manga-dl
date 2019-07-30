@@ -2,6 +2,7 @@ import argparse
 import pathlib
 import threading
 import requests
+import requests.adapters
 import bs4
 
 search_url_prefix = 'https://so.azs2019.com/serch.php?keyword='
@@ -52,12 +53,30 @@ class ThreadDL:
             self.cond.release()
 
 
+def get_from_url(url, stream=None):
+    s = requests.Session()
+    s.mount('http://', requests.adapters.HTTPAdapter(max_retries=3))
+    s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
+    try:
+        return s.get(url, stream=stream, timeout=5)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return None
+
+
 # dirname : pathlib.Path
 def save_img(dirname, url, img_id, tid):
-    r = requests.get(url, stream=True)
     junk, suffix = url.rsplit('.', maxsplit=1)
     img_name = pathlib.Path(str(img_id) + '.' + suffix)
     img_path = dirname.joinpath(img_name)
+
+    if img_path.exists():
+        return
+
+    # r = requests.get(url, stream=True)
+    r = get_from_url(url, True)
+    if r is None:
+        return
     with open(img_path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=256):
             f.write(chunk)
@@ -77,18 +96,14 @@ def get_all_image(save_dir, sub_dir, url):
     url_prefix, junk = url.rsplit('/', maxsplit=1)
     url_prefix += '/'
 
-    fullname = save_dir.joinpath(sub_dir)
-    if fullname.exists():
-        print('error! {} already exists'.format(fullname))
-        return
-    fullname.mkdir()
-    if not fullname.exists():
-        print('error! failed to create dir {}'.format(fullname))
-        return
+    fullname = pathlib.Path()
 
     img_cnt = 0
     while True:
-        webpage = requests.get(url)
+        # webpage = requests.get(url)
+        webpage = get_from_url(url)
+        if webpage is None:
+            return
         # webpage.encoding = 'gb2312'
         if webpage.encoding == 'ISO-8859-1':
             encodings = requests.utils.get_encodings_from_content(webpage.text)
@@ -97,6 +112,21 @@ def get_all_image(save_dir, sub_dir, url):
             else:
                 webpage.encoding = webpage.apparent_encoding
         html = bs4.BeautifulSoup(webpage.text, features='lxml')
+
+        if img_cnt == 0:  # make dir
+            if sub_dir is None:
+                title = html.find('h1', class_='article-title')
+                sub_dir = pathlib.Path(title.text)
+            fullname = save_dir.joinpath(sub_dir)
+            if fullname.exists():
+                print('warning: {} already exists'.format(fullname))
+                # return
+            else:
+                fullname.mkdir()
+                if not fullname.exists():
+                    print('error! failed to create dir {}'.format(fullname))
+                    return
+
         content = html.find('article', class_='article-content')
         p_img = content.children
 
@@ -118,7 +148,10 @@ def search(keyword, file=None):
     global search_url_prefix
     if file is None:
         url = search_url_prefix + requests.utils.quote(keyword, encoding='gbk')
-        webpage = requests.get(url)
+        # webpage = requests.get(url)
+        webpage = get_from_url(url)
+        if webpage is None:
+            return
         if webpage.encoding == 'ISO-8859-1':
             encodings = requests.utils.get_encodings_from_content(webpage.text)
             if encodings:
