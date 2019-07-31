@@ -12,7 +12,7 @@
 
 ## usage?
 
-先装beautifulsoup4, requests
+* 先装 beautifulsoup4, requests
 
 ``` shell
 $ pip3 install beautifulsoup4
@@ -22,23 +22,48 @@ $ pip3 install beautifulsoup4
 $ pip3 install requests
 ```
 
-装好后在命令行运行下面指令，
+* 命令行选项
 
-$SAVE_FOLDER 是你想保存的文件夹
+1. -h, —help : 打印帮助然后退出
+2. -s, —save : 指定保存的文件夹
+3. -u, —url : 从URL下载全部图片
+4. -S, —search : 根据关键词搜索图集
+5. -l, -list : 从列表文件中读取每一行URL并下载
+6. —search_url_prefix : 搜索功能的URL前缀（前缀+关键词 拼成URL，在网站换域名可以用此指定前缀。也可改源码，一般情况无需使用）
 
-$URL_FILE 是存有URL的文件。格式：一行子文件夹名（在你想保存的文件夹下的子文件夹，程序每读入两行，爬一个网页，为一个网页新建一个保存图片的文件夹），一行URL。注意你只能下上面网站的图片，其他网站请自学爬虫后自己写。
+* 示例
+
+1. 从 \$URL 下载，保存到 \$SAVEDIR 文件夹
 
 ``` shell
-$ python3 main.py $SAVE_FOLDER $URL_FILE
+$ python3 reptile.py -u $URL -s $SAVEDIR
 ```
 
-比如：
+2. 搜索关键词，列出搜索结果
 
 ``` shell
-$ python3 main.py ./pics/ url.txt
+$ python3 reptile.py -S $KEYWORD
 ```
 
-现在暂时只能自行添加URL，后面可能会自动化。不过你想想，下之前难道不挑过吗（？！）。
+3. 搜索关键词，下载全部
+
+``` shell
+$ python3 reptile.py -S $KEYWORD -s $SAVEDIR
+```
+
+4. 从列表下载全部
+
+``` shell
+$ python3 reptile.py -l $LIST -s $SAVEDIR
+```
+
+* 实现
+
+主线程爬取网页，多线程下载图片。
+
+线程池线程数可调（改源码）。
+
+如果被反爬虫可以改成 1。
 
 ## 鱼/渔
 
