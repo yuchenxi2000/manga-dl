@@ -57,8 +57,18 @@ def get_from_url(url, stream=None):
     s = requests.Session()
     s.mount('http://', requests.adapters.HTTPAdapter(max_retries=3))
     s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
+    headers = {
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) \
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+    }if stream is None else{
+        'accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) \
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+    }
     try:
-        return s.get(url, stream=stream, timeout=5)
+        return s.get(url, stream=stream, timeout=5, headers=headers)
     except requests.exceptions.RequestException as e:
         print(e)
         return None
@@ -185,6 +195,7 @@ def main():
     if \'--save\' is not specified, list results and exit. ')
     parser.add_argument('--search_url_prefix', help='change the prefix of search url')
     parser.add_argument('-s', '--save', help='directory to save images')
+    parser.add_argument('-l', '--list', help='download from url in file')
 
     args = parser.parse_args()
 
@@ -200,8 +211,7 @@ def main():
             get_all_image(save_dir, None, url)
             pool.finish_task()
         else:
-            print('please specify the directory to save images using \'--save\' argument')
-            exit(-1)
+            parser.error('please specify the directory to save images using \'--save\' argument')
     elif args.search:
         url_map = search(args.search)
 
@@ -216,6 +226,20 @@ def main():
         else:
             for t in url_map:
                 print(t)
+    elif args.list:
+        list_file = pathlib.Path(args.list)
+        if not list_file.exists():
+            parser.error('list file not found.')
+        if not args.save:
+            parser.error('please specify the directory to save images using \'--save\' argument')
+        save_dir = pathlib.Path(args.save)
+        with open(list_file) as fp:
+            pool.start_task()
+            for url in fp:
+                get_all_image(save_dir, None, url)
+            pool.finish_task()
+    else:
+        parser.print_help()
 
 
 if __name__ == '__main__':
