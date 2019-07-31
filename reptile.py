@@ -105,6 +105,7 @@ def get_all_image(save_dir, sub_dir, url):
 
     url_prefix, junk = url.rsplit('/', maxsplit=1)
     url_prefix += '/'
+    url = url.split('\n')[0]
 
     fullname = pathlib.Path()
 
