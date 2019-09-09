@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3.7
 import argparse
 import pathlib
 import threading
@@ -6,6 +7,8 @@ import requests.adapters
 import bs4
 
 search_url_prefix = 'https://so.azs2019.com/serch.php?keyword='
+domain_get_url = 'https://dz.zhaifulifabu.com:9527/'
+new_domain = None
 
 
 class ThreadDL:
@@ -51,6 +54,60 @@ class ThreadDL:
             self.li.append(t)
             self.cond.notifyAll()
             self.cond.release()
+
+
+def get_new_domain():
+    global domain_get_url
+    content = get_from_url(domain_get_url)
+
+    if content is None:
+        return None
+
+    # correct encoding
+    if content.encoding == 'ISO-8859-1':
+        encodings = requests.utils.get_encodings_from_content(content.text)
+        if encodings:
+            content.encoding = encodings[0]
+        else:
+            content.encoding = content.apparent_encoding
+
+    page = bs4.BeautifulSoup(content.text, features='lxml')
+    links = page.find_all('a', class_='panel')
+    return links[0].text
+
+
+def get_domain_from_url(url):
+    protocol = url.split('//', maxsplit=1)
+    if len(protocol) == 1:
+        remain = protocol[0]
+    else:
+        remain = protocol[1]
+    domain = remain.split('/', maxsplit=1)
+    return domain[0]
+
+
+def set_domain(url, ndomain):
+    protocol = url.split('//', maxsplit=1)
+    if len(protocol) == 1:
+        remain = protocol[0]
+        protocol = None
+    else:
+        remain = protocol[1]
+        protocol = protocol[0]
+    domain = remain.split('/', maxsplit=1)
+    if len(domain) == 1:
+        body = None
+        domain = domain[0]
+    else:
+        body = domain[1]
+        domain = domain[0]
+    result = ''
+    if protocol is not None:
+        result += protocol + '//'
+    result += ndomain
+    if body is not None:
+        result += '/' + body
+    return result
 
 
 def get_from_url(url, stream=None):
@@ -102,6 +159,17 @@ pool = ThreadDL(task)
 
 def get_all_image(save_dir, sub_dir, url):
     global pool
+    global new_domain
+
+    if new_domain is not None:
+        url = set_domain(url, new_domain)
+
+    # auto correct for url like this: '/2016/0328/6813.html'
+    # search and add a domain automatically
+    if url[0] == '/':
+        if new_domain is None:
+            new_domain = get_domain_from_url(get_new_domain())
+        url = 'https://' + new_domain + url
 
     url_prefix, junk = url.rsplit('/', maxsplit=1)
     url_prefix += '/'
@@ -155,10 +223,13 @@ def get_all_image(save_dir, sub_dir, url):
         url = url_prefix + link['href']
 
 
-def search(keyword, file=None):
+def search(keyword, page, file=None):
     global search_url_prefix
     if file is None:
         url = search_url_prefix + requests.utils.quote(keyword, encoding='gbk')
+        if page > 1:
+            url += '&page='
+            url += str(page)
         # webpage = requests.get(url)
         webpage = get_from_url(url)
         if webpage is None:
@@ -174,6 +245,11 @@ def search(keyword, file=None):
         fp = open(file)
         dom = bs4.BeautifulSoup(fp, features='lxml')
 
+    # get current page & total page
+    pagenum = dom.find('li', class_='active')
+    current, total = pagenum.text.split('/', maxsplit=1)
+
+    # get all the urls and titles
     url_list = []
     content3 = dom.find_all('p', class_='focus')
     for c in content3:
@@ -185,11 +261,53 @@ def search(keyword, file=None):
         title_list.append(c['title'])
 
     title_url_map = zip(title_list, url_list)
+    return int(current), int(total), title_url_map
+
+
+def newest(page, file=None):
+    global new_domain
+    if new_domain is None:
+        new_domain = get_domain_from_url(get_new_domain())
+        if new_domain is None:
+            print('error: failed to get new domain')
+            return
+    if file is None:
+        url = 'https://' + new_domain + '/page/' + str(page) + '.html'
+        # webpage = requests.get(url)
+        webpage = get_from_url(url)
+        if webpage is None:
+            return
+        if webpage.encoding == 'ISO-8859-1':
+            encodings = requests.utils.get_encodings_from_content(webpage.text)
+            if encodings:
+                webpage.encoding = encodings[0]
+            else:
+                webpage.encoding = webpage.apparent_encoding
+        dom = bs4.BeautifulSoup(webpage.text, features='lxml')
+    else:
+        fp = open(file)
+        dom = bs4.BeautifulSoup(fp, features='lxml')
+
+    # get all the urls and titles
+    url_list = []
+    title_list = []
+
+    c = dom.find_all('a', target="_blank", class_=None)
+    for l in c:
+        if l.span is None:
+            url_list.append(l['href'])
+            title_list.append(l['title'])
+        else:
+            break
+
+    title_url_map = zip(title_list, url_list)
     return title_url_map
 
 
 def main():
     global search_url_prefix
+    global new_domain
+
     parser = argparse.ArgumentParser(description='grab racy images from zhaifuli')
     parser.add_argument('-u', '--url', help='save image from url')  # action='store_true'
     parser.add_argument('-S', '--search', help='search mode, the search keyword. \
@@ -197,9 +315,22 @@ def main():
     parser.add_argument('--search_url_prefix', help='change the prefix of search url')
     parser.add_argument('-s', '--save', help='directory to save images')
     parser.add_argument('-l', '--list', help='download from url in file')
+    parser.add_argument('-p', '--page', help='page number')
+    parser.add_argument('-N', '--new_domain', help='automatically get new domain & apply', action='store_true')
+    parser.add_argument('-n', '--newest', help='get newest resources', action='store_true')
 
     args = parser.parse_args()
 
+    # get new domain
+    if args.new_domain:
+        link = get_new_domain()
+        if link is None:
+            print('error: failed to get new domain')
+        else:
+            new_domain = get_domain_from_url(link)
+            print('use new domain: {}'.format(new_domain))
+
+    # change url prefix
     if args.search_url_prefix:
         search_url_prefix = args.search_url_prefix
 
@@ -214,8 +345,13 @@ def main():
         else:
             parser.error('please specify the directory to save images using \'--save\' argument')
     elif args.search:
-        url_map = search(args.search)
-
+        page = 1
+        if args.page:
+            page = int(args.page)
+        currentpage, totalpage, url_map = search(args.search, page)
+        print('current page: {}'.format(currentpage))
+        print('total page: {}'.format(totalpage))
+        print('use -p to specify the page number.')
         if args.save:
             save_dir = pathlib.Path(args.save)
             pool.start_task()
@@ -239,6 +375,23 @@ def main():
             for url in fp:
                 get_all_image(save_dir, None, url)
             pool.finish_task()
+    elif args.newest:
+        page = 1
+        if args.page:
+            page = int(args.page)
+
+        url_map = newest(page)
+        if args.save:
+            save_dir = pathlib.Path(args.save)
+            pool.start_task()
+            for t in url_map:
+                sub_dir = pathlib.Path(t[0])
+                url = t[1]
+                get_all_image(save_dir, sub_dir, url)
+            pool.finish_task()
+        else:
+            for t in url_map:
+                print(t)
     else:
         parser.print_help()
 
