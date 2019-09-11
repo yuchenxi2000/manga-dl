@@ -304,6 +304,21 @@ def newest(page, file=None):
     return title_url_map
 
 
+def print_map(url_map):
+    num = 1
+    for t in url_map:
+        print('{}\t{}'.format(num, t[0]))
+        print('\t{}'.format(t[1]))
+        num += 1
+
+
+def gen_list(url_map, path):
+    list_file = open(path, 'w')
+    for t in url_map:
+        list_file.write(t[1] + ' ' + t[0] + '\n')
+    list_file.close()
+
+
 def main():
     global search_url_prefix
     global new_domain
@@ -318,6 +333,7 @@ def main():
     parser.add_argument('-p', '--page', help='page number')
     parser.add_argument('-N', '--new_domain', help='automatically get new domain & apply', action='store_true')
     parser.add_argument('-n', '--newest', help='get newest resources', action='store_true')
+    parser.add_argument('-gl', '--genlist', help='generate list file')
 
     args = parser.parse_args()
 
@@ -360,9 +376,10 @@ def main():
                 url = t[1]
                 get_all_image(save_dir, sub_dir, url)
             pool.finish_task()
+        elif args.genlist:
+            gen_list(url_map, args.genlist)
         else:
-            for t in url_map:
-                print(t)
+            print_map(url_map)
     elif args.list:
         list_file = pathlib.Path(args.list)
         if not list_file.exists():
@@ -373,6 +390,7 @@ def main():
         with open(list_file) as fp:
             pool.start_task()
             for url in fp:
+                url = url.split(' ')[0]
                 get_all_image(save_dir, None, url)
             pool.finish_task()
     elif args.newest:
@@ -389,9 +407,10 @@ def main():
                 url = t[1]
                 get_all_image(save_dir, sub_dir, url)
             pool.finish_task()
+        elif args.genlist:
+            gen_list(url_map, args.genlist)
         else:
-            for t in url_map:
-                print(t)
+            print_map(url_map)
     else:
         parser.print_help()
 
