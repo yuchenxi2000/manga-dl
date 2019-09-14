@@ -35,6 +35,8 @@ $ pip3 install requests
 7. -N, --new_domain : 自动搜索新域名并更换（访问慢可试试）
 8. -n, --newest : 列出最新的资源
 9. -p, --page : 指定页码
+10. -gl, --genlist : 把网址保存到文件
+11. -v, --preview : 生成预览网页（双击 preview.html，即可在浏览器中打开。preview.html 除去了广告等内容）
 
 * 示例
 
@@ -75,6 +77,22 @@ $ python3 reptile.py -l $LIST -s $SAVEDIR
 ```
 
 列表格式：一行一个URL
+
+7. 搜索关键词/查看最新内容并将网址保存到文件
+
+``` shell
+$ python3 reptile.py -S $KEYWORD -gl $FILE
+```
+
+``` shell
+$ python3 reptile.py -n -gl $FILE
+```
+
+8. 生成预览 html
+
+``` shell
+$ python3 reptile.py -v $URL
+```
 
 ## 实现
 

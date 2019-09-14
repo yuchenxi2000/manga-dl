@@ -1,6 +1,6 @@
 var img_per_page = 5
 var current_page = 0
-var total_page = Math.round(images.length / img_per_page)
+var total_page = -Math.floor(-images.length / img_per_page)
 function insertImages(pagenum) {
 	var end = Math.min((pagenum + 1) * img_per_page, images.length)
 	var oldimages = document.getElementById('image-content')
