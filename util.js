@@ -9,11 +9,10 @@ function insertImages(pagenum) {
 	var newimages = document.createElement('div')
 	newimages.setAttribute('id', 'image-content')
 	for (var i = pagenum * img_per_page; i < end; ++i) {
-		var p = document.createElement('p')
-		p.setAttribute('class', 'image')
 		var img = document.createElement('img')
 		img.setAttribute('src', images[i])
 		img.setAttribute('alt', 'image')
+		img.setAttribute('class', 'image')
 		newimages.appendChild(img)
 	}
 	document.body.insertBefore(newimages, bottom)
@@ -33,6 +32,14 @@ function next() {
 	else
 		current_page = total_page - 1
 	updatePageinfo()
+}
+function gotoPage(inputstr) {
+	var pagenum = parseInt(inputstr, 10)
+	if (pagenum < 1 || pagenum > total_page) return;
+	if (current_page == pagenum - 1) return;
+	current_page = pagenum - 1
+	updatePageinfo()
+	insertImages(pagenum - 1)
 }
 function updatePageinfo() {
 	var pageinfo = document.getElementById('pageinfo')
