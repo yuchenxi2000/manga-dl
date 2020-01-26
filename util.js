@@ -51,24 +51,12 @@ var userAgent = navigator.userAgent;
 var isChrome = userAgent.indexOf('Chrome') > -1
 var isSafari = userAgent.indexOf('Safari') > -1
 function goTop() {
-	if (isChrome) {
-		timer = setInterval(function () {
-			var backtop = document.documentElement.scrollTop //速度操作  减速
-			var speedtop = backtop / 5
-			document.documentElement.scrollTop = backtop - speedtop  //高度不断减少
-			if(backtop == 0){  //滑动到顶端
-				clearInterval(timer);  //清除计时器
-			}
-		}, 30)
-	}else if (isSafari) {
-		timer = setInterval(function () {
-			var backtop = document.body.scrollTop //速度操作  减速
-			var speedtop = backtop / 5
-			document.body.scrollTop = backtop - speedtop  //高度不断减少
-			if(backtop == 0){  //滑动到顶端
-				clearInterval(timer);  //清除计时器
-			}
-		}, 30)
-	}
-
+	timer = setInterval(function () {
+		var backtop = document.documentElement.scrollTop //速度操作  减速
+		var speedtop = backtop / 5
+		document.documentElement.scrollTop = backtop - speedtop  //高度不断减少
+		if(backtop == 0){  //滑动到顶端
+			clearInterval(timer);  //清除计时器
+		}
+	}, 30)
 }

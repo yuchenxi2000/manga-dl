@@ -7,7 +7,6 @@
 .idea/zfl-reptile.iml
 page.html
 page0.html
-preview0.html
-preview1.html
+preview[0-9].html
 
 test/*

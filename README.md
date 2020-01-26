@@ -1,10 +1,12 @@
 # zfl-reptile
 
-一个爬取racy pics的爬虫 (/ω＼) 
+一个爬取racy pics的爬虫 (/ω＼)（网站：宅福利
 
-## 美的事物谁不喜欢呢。
+## !notice!
 
-关于网站是啥。我只能提供拼音（zhaifuli）。有心的人自然会找到。
+请适度使用，俗话说得好，
+
+> 小撸怡情，大撸伤身，强撸灰飞烟灭。
 
 自己看看就好了。
 
@@ -78,14 +80,20 @@ $ python3 reptile.py -l $LIST -s $SAVEDIR
 
 列表格式：一行一个URL
 
-7. 搜索关键词/查看最新内容并将网址保存到文件
+7. 搜索关键词/查看最新内容并将网址保存到文件 \$FILE
 
 ``` shell
-$ python3 reptile.py -S $KEYWORD -gl $FILE
+$ python3 reptile.py -S $KEYWORD -gl > $FILE
 ```
 
 ``` shell
-$ python3 reptile.py -n -gl $FILE
+$ python3 reptile.py -n -gl > $FILE
+```
+
+或者，将列表打印到终端：
+
+``` shell
+$ python3 reptile.py -n -gl
 ```
 
 8. 生成预览 html

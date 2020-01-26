@@ -7,7 +7,7 @@ import requests.adapters
 import bs4
 
 search_url_prefix = 'https://so.azs2019.com/serch.php?keyword='
-domain_get_url = 'https://dz.zhaifulifabu.com:9527/'
+domain_get_url = 'https://dzs.zhaifulifabu.com:9527/index.html'
 new_domain = None
 
 
@@ -399,11 +399,16 @@ def print_map(url_map):
         num += 1
 
 
-def gen_list(url_map, path):
-    list_file = open(path, 'w')
+# def gen_list(url_map, path):
+#     list_file = open(path, 'w')
+#     for t in url_map:
+#         list_file.write(t[1] + ' ' + t[0] + '\n')
+#     list_file.close()
+
+
+def gen_list(url_map):
     for t in url_map:
-        list_file.write(t[1] + ' ' + t[0] + '\n')
-    list_file.close()
+        print(t[1] + ' ' + t[0])
 
 
 def main():
@@ -420,7 +425,7 @@ def main():
     parser.add_argument('-p', '--page', help='page number')
     parser.add_argument('-N', '--new_domain', help='automatically get new domain & apply', action='store_true')
     parser.add_argument('-n', '--newest', help='get newest resources', action='store_true')
-    parser.add_argument('-gl', '--genlist', help='generate list file')
+    parser.add_argument('-gl', '--genlist', help='generate list file', action='store_true')
     parser.add_argument('-v', '--view', help='generate preview html')
     parser.add_argument('-f', '--file', help='html file')
 
@@ -454,9 +459,10 @@ def main():
         if args.page:
             page = int(args.page)
         currentpage, totalpage, url_map = search(args.search, page)
-        print('current page: {}'.format(currentpage))
-        print('total page: {}'.format(totalpage))
-        print('use -p to specify the page number.')
+        if not args.genlist:
+            print('current page: {}'.format(currentpage))
+            print('total page: {}'.format(totalpage))
+            print('use -p to specify the page number.')
         if args.save:
             save_dir = pathlib.Path(args.save)
             pool.start_task()
@@ -466,7 +472,7 @@ def main():
                 get_all_image(save_dir, sub_dir, url)
             pool.finish_task()
         elif args.genlist:
-            gen_list(url_map, args.genlist)
+            gen_list(url_map)
         else:
             print_map(url_map)
     elif args.list:
@@ -497,8 +503,10 @@ def main():
                 get_all_image(save_dir, sub_dir, url)
             pool.finish_task()
         elif args.genlist:
-            gen_list(url_map, args.genlist)
+            gen_list(url_map)
         else:
+            print('current page: {}'.format(page))
+            print('use -p to specify the page number.')
             print_map(url_map)
     elif args.view:
         if args.file:
