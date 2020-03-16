@@ -1,12 +1,8 @@
 .DS_Store
 
-.idea/encodings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/workspace.xml
-.idea/zfl-reptile.iml
+.idea
 page.html
 page0.html
 preview[0-9].html
 
-test/*
+test
