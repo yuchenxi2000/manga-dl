@@ -131,4 +131,6 @@ for img in imgs:
     if not try_save(img_url, save_dir):
         img_url = img_url.rsplit('.', maxsplit=1)[0] + '.png'
         if not try_save(img_url, save_dir):
-            print('failed to save {}'.format(img_url))
+            img_url = img_url.rsplit('.', maxsplit=1)[0] + '.jpg'
+            if not try_save(img_url, save_dir):
+                print('failed to save {}'.format(img_url))
