@@ -9,6 +9,10 @@
 # example:
 # python3.7 erozine.py -u https://erozine.jp/eromanga/gf_face_white_sirako -d .
 
+# 设置proxy：
+# --proxy="socks5://127.0.0.1:1080"
+# --proxy="http://127.0.0.1:8080"
+
 import bs4
 import requests
 import requests.adapters
@@ -21,6 +25,10 @@ import argparse
 
 def get_from_url(url, stream=None):
     s = requests.Session()
+
+    if proxy_server is not None:
+        s.proxies = {"http": proxy_server, "https": proxy_server}
+
     # s.mount('http://', requests.adapters.HTTPAdapter(max_retries=3))
     s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
     cookies = None
@@ -98,7 +106,11 @@ def confirm_yes(s):
 parser = argparse.ArgumentParser(description='download manga from https://erozine.jp/')
 parser.add_argument('-u', '--url', help='download from url')
 parser.add_argument('-d', '--dir', help='save directory')
+parser.add_argument('--proxy', help='set proxy server')
 arg = parser.parse_args()
+
+# set proxy
+proxy_server = arg.proxy
 
 # url, save dir
 url = arg.url
@@ -125,7 +137,8 @@ author = info.span.string
 save_dir = save_dir.joinpath('{} - {}'.format(title, author))
 if save_dir.exists():
     confirm_yes('directory {} already exists. continue?'.format(save_dir))
-save_dir.mkdir()
+else:
+    save_dir.mkdir()
 
 # info.txt
 info_file_path = save_dir.joinpath('info.txt')
@@ -145,7 +158,8 @@ for line in info.find_all('br'):
 img_dir = save_dir.joinpath('manga')
 if img_dir.exists():
     confirm_yes('manga directory already exists. continue?')
-img_dir.mkdir()
+else:
+    img_dir.mkdir()
 
 # write img
 for img in article.find_all('img'):

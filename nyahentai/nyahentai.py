@@ -10,6 +10,10 @@
 # example:
 # python3.7 nya.py -u https://zh.nyahentai.cc/g/286285/list2/ -d .
 
+# 设置proxy：
+# --proxy="socks5://127.0.0.1:1080"
+# --proxy="http://127.0.0.1:8080"
+
 import bs4
 import requests
 import requests.adapters
@@ -22,6 +26,10 @@ import argparse
 
 def get_from_url(url, stream=None):
     s = requests.Session()
+
+    if proxy_server is not None:
+        s.proxies = {"http": proxy_server, "https": proxy_server}
+
     # s.mount('http://', requests.adapters.HTTPAdapter(max_retries=3))
     s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
     # cookies = {
@@ -100,7 +108,11 @@ def try_save(img_url, save_dir):
 parser = argparse.ArgumentParser(description='downloads manga from https://zh.nyahentai.cc/')
 parser.add_argument('-u', '--url', help='download from url')
 parser.add_argument('-d', '--dir', help='save directory')
+parser.add_argument('--proxy', help='set proxy server')
 arg = parser.parse_args()
+
+# set proxy
+proxy_server = arg.proxy
 
 if arg.url is None or arg.dir is None:
     parser.print_help()
