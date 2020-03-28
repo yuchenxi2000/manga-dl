@@ -1,15 +1,19 @@
-# ghs
+# manga-dl
 
 ## Description
 
-顾名思义，。。
+一些爬虫
+
+起因是本人想把网站图片全部爬下来（如漫画的一话全部内容）
 
 ## Content
 
-* zhaifuli: 三次元
+* zhaifuli: 三次元车
 
-* nyahentai: 二次元本子
+* nyahentai: 二次元H本
 
-* erozine: 二次元本子
+* erozine: 二次元H本
+
+* dmzj: 漫画（动漫之家）
 
 相应文件夹里有使用说明哟
