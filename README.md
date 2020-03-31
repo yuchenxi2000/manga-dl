@@ -8,8 +8,6 @@
 
 ## Content
 
-* zhaifuli: 三次元车
-
 * nyahentai: 二次元H本
 
 * erozine: 二次元H本
