@@ -8,7 +8,7 @@
 # 其中 '286285' 可为其他数字
 
 # example:
-# python3.7 nya.py -u https://zh.nyahentai.cc/g/286285/list2/ -d .
+# python3.7 nyahentai.py -u https://zh.nyahentai.cc/g/286285/list2/ -d .
 
 # 设置proxy：
 # --proxy="socks5://127.0.0.1:1080"
@@ -20,40 +20,29 @@ import requests.adapters
 import brotli
 import pathlib
 import argparse
+import re
 
 # 上面这些 pip 包请自行安装
 
+s = requests.Session()
+s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
+
 
 def get_from_url(url, stream=None):
-    s = requests.Session()
-
-    if proxy_server is not None:
-        s.proxies = {"http": proxy_server, "https": proxy_server}
-
-    # s.mount('http://', requests.adapters.HTTPAdapter(max_retries=3))
-    s.mount('https://', requests.adapters.HTTPAdapter(max_retries=3))
-    # cookies = {
-    #     '__cfduid': 'd15e83d73ddb21566308e9658995fa4b01584067981',
-    #     'splash_i': 'false',
-    #     'splashWeb-3387561-42': '1',
-    # }
-    cookies = None
     headers = {
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'accept': 'text/html,application/xhtml+xml,application/xml;\
+q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
         'accept-encoding': 'gzip, deflate, br',
         'accept-language': 'zh,en;q=0.9,ja;q=0.8,zh-CN;q=0.7',
-        # 'sec-fetch-dest': 'document',
-        # 'sec-fetch-mode': 'navigate',
-        # 'sec-fetch-site': 'none',
-        # 'sec-fetch-user': '?1',
-        # 'upgrade-insecure-requests': '1',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) \
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
     } if stream is None else{
         'accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) \
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
     }
     try:
-        return s.get(url, stream=stream, timeout=5, headers=headers, cookies=cookies)
+        return s.get(url, stream=stream, timeout=5, headers=headers)
     except requests.exceptions.RequestException as e:
         print(e)
         return None
@@ -112,13 +101,20 @@ parser.add_argument('--proxy', help='set proxy server')
 arg = parser.parse_args()
 
 # set proxy
-proxy_server = arg.proxy
+if arg.proxy:
+    s.proxies = {"http": arg.proxy, "https": arg.proxy}
 
 if arg.url is None or arg.dir is None:
     parser.print_help()
     exit(0)
 
 url = arg.url
+# check url
+# eg. https://zh.nyahentai.cc/g/286285/list2/
+if re.match(r'^https://zh\.nyahentai\.cc/g/[0-9]+/list2/?$', url) is None:
+    print('invalid url')
+    exit(-1)
+
 save_dir = pathlib.Path(arg.dir)
 if not save_dir.exists():
     print('save directory not exist!')

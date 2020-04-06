@@ -8,10 +8,12 @@
 
 ## Content
 
-* nyahentai: 二次元H本
+* nyahentai: H本
 
-* erozine: 二次元H本
+* erozine: H本
 
 * dmzj: 漫画（动漫之家）
+
+* mangabz: 漫画
 
 相应文件夹里有使用说明哟

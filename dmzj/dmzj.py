@@ -14,9 +14,9 @@ def try_mkdir(dir: pathlib.Path) -> None:
     if dir.is_dir():
         ans = input('directory {} already exists. continue? Y/n: '.format(dir))
         while True:
-            if ans == 'Y' or 'y':
+            if ans == 'Y' or ans == 'y':
                 return
-            elif ans == 'N' or 'n':
+            elif ans == 'N' or ans == 'n':
                 print('exit.')
                 exit(0)
             else:
@@ -144,7 +144,10 @@ def get_comic(s: requests.Session, url: str, dir: pathlib.Path) -> None:
     m = re.search(r'initIntroData\((.*)\)', text)
     chapters = json.loads(m.group(1))
 
-    for c in chapters[0]['data']:
+    chapter_list = chapters[0]['data']
+    chapter_list.sort(key=lambda a: a['chapter_order'])
+
+    for c in chapter_list:
         title = c['chapter_name']
         chapter_url = 'https://m.dmzj.com/view/{0}/{1}.html'.format(c['comic_id'], c['id'])
         chapter_dir = dir.joinpath(title)
