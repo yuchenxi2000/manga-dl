@@ -1,14 +1,14 @@
 #!/usr/local/bin/python3.7
 # -*- coding:utf-8 -*-
 
-# 爬取 https://zh.nyahentai.cc/ 下的本子
+# 爬取 https://zh.doghentai.com/ 下的本子
 # 命令行参数 -u, -d
 # 你的 url 必须是这种形式：
-# https://zh.nyahentai.cc/g/286285/list2/
+# https://zh.doghentai.com/g/286285/list2/
 # 其中 '286285' 可为其他数字
 
 # example:
-# python3.7 nyahentai.py -u https://zh.nyahentai.cc/g/286285/list2/ -d .
+# python3.7 nyahentai.py -u https://zh.doghentai.com/g/286285/list2/ -d .
 
 # 设置proxy：
 # --proxy="socks5://127.0.0.1:1080"
@@ -94,7 +94,7 @@ def try_save(img_url, save_dir):
     return False
 
 
-parser = argparse.ArgumentParser(description='downloads manga from https://zh.nyahentai.cc/')
+parser = argparse.ArgumentParser(description='downloads manga from https://zh.doghentai.com/')
 parser.add_argument('-u', '--url', help='download from url')
 parser.add_argument('-d', '--dir', help='save directory')
 parser.add_argument('--proxy', help='set proxy server')
@@ -110,8 +110,8 @@ if arg.url is None or arg.dir is None:
 
 url = arg.url
 # check url
-# eg. https://zh.nyahentai.cc/g/286285/list2/
-if re.match(r'^https://zh\.nyahentai\.cc/g/[0-9]+/list2/?$', url) is None:
+# eg. https://zh.doghentai.com/g/286285/list2/
+if re.match(r'^https://zh\.doghentai\.com/g/[0-9]+/list2/?$', url) is None:
     print('invalid url')
     exit(-1)
 
